@@ -1,0 +1,25 @@
+# FastAPI y servidor ASGI
+fastapi
+uvicorn[standard]
+
+# Base de datos
+sqlalchemy
+psycopg2-binary
+
+# Migraciones
+alembic
+
+# Manejo de variables de entorno
+python-dotenv
+pydantic
+pydantic-settings
+pydantic[email]
+
+# Seguridad
+passlib[bcrypt]
+python-jose
+
+# Testing
+pytest
+pytest-asyncio
+httpx

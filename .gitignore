@@ -1,0 +1,9 @@
+# Ignorar entornos locales y dependencias
+**/data/
+**/node_modules/
+**/dist/
+**/__pycache__/
+**/*.pyc
+
+# Ignorar credenciales
+**/.env

@@ -1,0 +1,68 @@
+user [icon: user, color: blue] {
+  id int pk
+  username unique string
+  email unique string
+  password_hash string
+  created_at datetime
+  created_by int
+  updated_at datetime
+  updated_by int
+}
+
+status [] {
+  id int pk
+  name string
+  color string
+  created_at datetime
+  created_by int
+  updated_at datetime
+  updated_by int
+}
+
+priority [] {
+  id int pk
+  name string
+  color string
+  created_at datetime
+  created_by int
+  updated_at datetime
+  updated_by int
+}
+
+task [icon: task, color: red] {
+  id int pk
+  user_id int
+  title string
+  description string
+  status_id int
+  priority_id int
+  due_date datetime
+  created_at datetime
+  created_by int
+  updated_at datetime
+  updated_by int
+}
+
+tag [icon: tag, color: green] {
+  id int pk
+  name string
+  created_at datetime
+  created_by int
+  updated_at datetime
+  updated_by int
+}
+
+tasktag [icon: folder, color: yellow] {
+  task_id int
+  tag_id int
+  created_at datetime
+  created_by int
+  updated_at datetime
+  updated_by int
+}
+
+user.id < task.user_id
+task.id < tasktag.task_id
+tag.id < tasktag.tag_id
+status.id - task.status_id
+priority.id - task.priority_id
