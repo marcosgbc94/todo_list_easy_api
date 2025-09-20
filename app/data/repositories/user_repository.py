@@ -123,3 +123,19 @@ class UserRepository:
                 updated_by=user_model_mapped.updated_by
             )
         )
+    
+    async def delete_user_by_id(session: AsyncSession, user_id: int) -> Result:
+        user = await session.get(UserModel, user_id)
+        if not user:
+            return Result.fail("Usuario no encontrado", ErrorCode.USER_NOT_FOUND)
+        
+        try:
+            await session.delete(user)
+            await session.commit()
+        except IntegrityError as e:
+            await session.rollback()
+
+            return Result.fail("Error interno", ErrorCode.INTERNAL_ERROR)
+        
+        return Result.ok()
+    

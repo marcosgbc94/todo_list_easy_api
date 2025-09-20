@@ -11,7 +11,7 @@ class Result(Generic[T]):
         self.code = code
 
     @classmethod
-    def ok(cls, data: T):
+    def ok(cls, data: Optional[T] = None):
         return cls(success=True, data=data)
 
     @classmethod
