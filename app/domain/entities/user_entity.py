@@ -1,19 +1,37 @@
+from datetime import datetime
+from typing import Optional
+from core.security import hash_password
+from datetime import datetime, timezone
 from typing import Optional
 from core.security import hash_password
 
 class UserEntity:
-    def __init__(self, username: str, email: str, password: Optional[str] = None, id: Optional[int] = None, password_hash: Optional[str] = None):
+    def __init__(
+        self,
+        id: Optional[int] = None,
+        username: Optional[str] = None,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+        password_hash: Optional[str] = None,
+        created_at: Optional[datetime] = None,
+        created_by: Optional[int] = None,
+        updated_at: Optional[datetime] = None,
+        updated_by: Optional[int] = None,
+    ):
         self.id = id
         self.username = username
         self.email = email
+        self.password = password
+        self.password_hash = password_hash
+        self.created_at = created_at
+        self.created_by = created_by
+        self.updated_at = updated_at
+        self.updated_by = updated_by
 
-        if password:
-            self.password_hash = self._set_password(password=password)
-        elif password_hash:
-            self.password_hash = password_hash
-        else:
-            self.password = None
-            self.password_hash = None
+    @staticmethod
+    def set_password(password: str) -> str:
+        return hash_password(password=password)
 
-    def _set_password(self, password: str):
-        self.password_hash = hash_password(password)
+    @staticmethod
+    def get_datetime_now() -> datetime:
+        return datetime.now(timezone.utc)
