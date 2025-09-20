@@ -1,3 +1,5 @@
+from core.error_list import ErrorCode
+from core.result import Result
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from domain.entities.user_entity import UserEntity
@@ -7,9 +9,9 @@ class UpdateUserByIdUseCase:
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
 
-    async def execute(self, session: AsyncSession, user_data: UserEntity) -> UserEntity:
+    async def execute(self, session: AsyncSession, user_data: UserEntity) -> Result[UserEntity]:
         if not user_data or not user_data.password:
-            raise HTTPException(status_code=400, detail="No se pudo actualizar el usuario")
+            return Result.fail("Faltan parámetros", ErrorCode.PARAMS_NOT_FOUND)
         
         user_data.password_hash = UserEntity.set_password(user_data.password)
         user_data.updated_at = UserEntity.get_datetime_now()

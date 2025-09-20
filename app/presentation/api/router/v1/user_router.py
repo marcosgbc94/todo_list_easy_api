@@ -1,4 +1,5 @@
 from typing import List
+from core.error_list import ErrorCode
 from domain.use_cases.user_use_cases.create_user_use_case import CreateUserUseCase
 from domain.use_cases.user_use_cases.update_user_by_id_use_case import UpdateUserByIdUseCase
 from domain.entities.user_entity import UserEntity
@@ -15,11 +16,16 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.get("", response_model=List[UserResponse])
 async def get_users(database_session: Session = Depends(database.get_session_database)):
     # Obtener datos en formato UserModel (Model)
-    users = await GetUsersUseCase(UserRepository).execute(session=database_session)
+    result = await GetUsersUseCase(UserRepository).execute(session=database_session)
 
     # Comprobar errores
-    if not users:
-        raise HTTPException(status_code=404, detail="Ningún usuario registrado")
+    if not result.success:
+        if result.code == ErrorCode.USERS_NOT_FOUND:
+            raise HTTPException(status_code=404, detail=result.error)
+        else:
+            raise HTTPException(status_code=500, detail="Error interno")
+    
+    users = result.data
     
     # Retornar en formato UserResponse (Schema)
     return [
@@ -38,12 +44,16 @@ async def get_users(database_session: Session = Depends(database.get_session_dat
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user_by_id(user_id: int, database_session: Session = Depends(database.get_session_database)):
     # Obtener datos en formato UserModel (Model)
-    user = await GetUserByIdUseCase(UserRepository).execute(session=database_session, user_id=user_id)
+    result = await GetUserByIdUseCase(UserRepository).execute(session=database_session, user_id=user_id)
 
-    # Comprobar errores
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no existe")
+    if not result.success:
+        if result.code == ErrorCode.USER_NOT_FOUND:
+            raise HTTPException(status_code=404, detail=result.error)
+        else:
+            raise HTTPException(status_code=500, detail="Error interno")
     
+    user = result.data
+
     # Retornar en formato UserResponse (Schema)
     return UserResponse(
         id=user.id,
@@ -65,11 +75,16 @@ async def create_user(user_data: UserCreateRequest, database_session: Session = 
     )
 
     # Obtener datos en formato UserModel (Model)
-    user = await CreateUserUseCase(UserRepository).execute(database_session, user_entity_mapped)
+    result = await CreateUserUseCase(UserRepository).execute(database_session, user_entity_mapped)
 
     # Comprobar errores
-    if not user:
-        raise HTTPException(status_code=400, detail="No se pudo crear el usuario")
+    if not result.success:
+        if result.code in (ErrorCode.USER_ALREADY_EXISTS, ErrorCode.PARAMS_NOT_FOUND):
+            raise HTTPException(status_code=400, detail=result.error)
+        else:
+            raise HTTPException(status_code=500, detail="Error interno")
+        
+    user = result.data
    
     return UserCreateResponse(
         id=user.id,
@@ -90,11 +105,16 @@ async def update_user_by_id(user_id: int, user_update: UserUpdateRequest, databa
     )
 
     # Actualiza y obtiene los datos en formato UserModel (Model)
-    user = await UpdateUserByIdUseCase(UserRepository).execute(session=database_session, user_data=user_entity_mapper)
+    result = await UpdateUserByIdUseCase(UserRepository).execute(session=database_session, user_data=user_entity_mapper)
 
     # Comprobar errores
-    if not user:
-        raise HTTPException(status_code=400, detail="No se pudo actualizar el usuario")
+    if not result.success:
+        if result.code in (ErrorCode.USER_ALREADY_EXISTS, ErrorCode.PARAMS_NOT_FOUND):
+            raise HTTPException(status_code=400, detail=result.error)
+        else:
+            raise HTTPException(status_code=500, detail="Error interno")
+        
+    user = result.data
     
     return UserUpdateResponse(
         id=user.id,

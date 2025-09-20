@@ -1,4 +1,6 @@
 from asyncpg import UniqueViolationError
+from core.error_list import ErrorCode
+from core.result import Result
 from sqlalchemy import select
 from typing import List
 from fastapi import HTTPException
@@ -10,12 +12,15 @@ from domain.entities.user_entity import UserEntity
 from data.models.user_model import UserModel
 
 class UserRepository:
-    async def get_users(session: AsyncSession) -> List[UserEntity]:
+    async def get_users(session: AsyncSession) -> Result[List[UserEntity]]:
         result = await session.execute(select(UserModel))
         users = result.scalars().all()
+
+        if not users:
+            return Result.fail("Ningún usuario registrado", ErrorCode.USERS_NOT_FOUND)
         
         # Se convierte salida UserModel a UserEntity
-        return [
+        user_entities = [
             UserEntity(
                 id=user.id,
                 username=user.username,
@@ -28,26 +33,30 @@ class UserRepository:
             for user in users
         ]
 
-    async def get_user_by_id(session: AsyncSession, user_id: int) -> UserEntity:
+        return Result.ok(user_entities)
+
+    async def get_user_by_id(session: AsyncSession, user_id: int) -> Result[UserEntity]:
         result = await session.execute(
             select(UserModel).where(UserModel.id == user_id)
         )
         user = result.scalar_one_or_none()  # devuelve el primer registro o None
 
         if not user:
-            return None
+            return Result.fail("Usuario no existe", ErrorCode.USER_NOT_FOUND)
         
-        return UserEntity(
-            id=user.id,
-            username=user.username,
-            email=user.email,
-            created_at=user.created_at,
-            created_by=user.created_by,
-            updated_at=user.updated_at,
-            updated_by=user.updated_by
+        return Result.ok(
+            UserEntity(
+                id=user.id,
+                username=user.username,
+                email=user.email,
+                created_at=user.created_at,
+                created_by=user.created_by,
+                updated_at=user.updated_at,
+                updated_by=user.updated_by,
+            )
         )
 
-    async def create_user(session: AsyncSession, user_data: UserEntity) -> UserEntity:
+    async def create_user(session: AsyncSession, user_data: UserEntity) -> Result[UserEntity]:
         # Mapeo del entity al modelo
         user = UserModel(
             username=user_data.username,
@@ -65,29 +74,26 @@ class UserRepository:
             await session.rollback()
 
             if getattr(e.orig, 'pgcode', None) == '23505':
-                raise HTTPException(
-                    status_code=400,
-                    detail="Usuario o correo ya existe"
-                )
-            raise HTTPException(
-                status_code=500,
-                detail="Error interno de la base de datos"
-            )
+                return Result.fail("Usuario ya existe", ErrorCode.USER_ALREADY_EXISTS)
+            else:
+                return Result.fail("Error interno", ErrorCode.INTERNAL_ERROR)
 
-        return UserEntity(
-            id=user.id,
-            username=user.username,
-            email=user.email,
-            created_at=user.created_at,
-            created_by=user.created_by,
-            updated_at=user.updated_at,
-            updated_by=user.updated_by
+        return Result.ok(
+            UserEntity(
+                id=user.id,
+                username=user.username,
+                email=user.email,
+                created_at=user.created_at,
+                created_by=user.created_by,
+                updated_at=user.updated_at,
+                updated_by=user.updated_by
+            )
         )
 
-    async def update_user_by_id(session: AsyncSession, user_data: UserEntity):
+    async def update_user_by_id(session: AsyncSession, user_data: UserEntity) -> Result[UserEntity]:
         user_model_mapped = await session.get(UserModel, user_data.id)
         if not user_model_mapped:
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+            return Result.fail("Usuario no existe", ErrorCode.USER_NOT_FOUND)
 
         user_model_mapped.username = user_data.username
         user_model_mapped.email = user_data.email
@@ -102,15 +108,18 @@ class UserRepository:
             await session.rollback()
             
             if "unique constraint" in str(e.orig).lower() or getattr(e.orig, "pgcode", None) == "23505":
-                raise HTTPException(status_code=400, detail="Usuario o correo ya existe")
-            raise HTTPException(status_code=500, detail="Error interno de la base de datos")
+                return Result.fail("Usuario ya existe", ErrorCode.USER_ALREADY_EXISTS)
+            else:
+                return Result.fail("Error interno", ErrorCode.INTERNAL_ERROR)
         
-        return UserEntity(
-            id=user_model_mapped.id,
-            username=user_model_mapped.username,
-            email=user_model_mapped.email,
-            created_at=user_model_mapped.created_at,
-            created_by=user_model_mapped.created_by,
-            updated_at=user_model_mapped.updated_at,
-            updated_by=user_model_mapped.updated_by
+        return Result.ok(
+            UserEntity(
+                id=user_model_mapped.id,
+                username=user_model_mapped.username,
+                email=user_model_mapped.email,
+                created_at=user_model_mapped.created_at,
+                created_by=user_model_mapped.created_by,
+                updated_at=user_model_mapped.updated_at,
+                updated_by=user_model_mapped.updated_by
+            )
         )
