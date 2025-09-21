@@ -1,18 +1,15 @@
-from asyncpg import UniqueViolationError
+from domain.ports.i_user_repository import IUserRepository
 from core.error_list import ErrorCode
 from core.result import Result
 from sqlalchemy import select
 from typing import List
-from fastapi import HTTPException
-from psycopg2.errors import UniqueViolation
-from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from domain.entities.user_entity import UserEntity
 from data.models.user_model import UserModel
 
-class UserRepository:
-    async def get_users(session: AsyncSession) -> Result[List[UserEntity]]:
+class UserRepository(IUserRepository):
+    async def get_users(self, session: AsyncSession) -> Result[List[UserEntity]]:
         result = await session.execute(select(UserModel))
         users = result.scalars().all()
 
@@ -35,7 +32,7 @@ class UserRepository:
 
         return Result.ok(user_entities)
 
-    async def get_user_by_id(session: AsyncSession, user_id: int) -> Result[UserEntity]:
+    async def get_user_by_id(self, session: AsyncSession, user_id: int) -> Result[UserEntity]:
         result = await session.execute(
             select(UserModel).where(UserModel.id == user_id)
         )
@@ -56,7 +53,7 @@ class UserRepository:
             )
         )
 
-    async def create_user(session: AsyncSession, user_data: UserEntity) -> Result[UserEntity]:
+    async def create_user(self, session: AsyncSession, user_data: UserEntity) -> Result[UserEntity]:
         # Mapeo del entity al modelo
         user = UserModel(
             username=user_data.username,
@@ -90,7 +87,7 @@ class UserRepository:
             )
         )
 
-    async def update_user_by_id(session: AsyncSession, user_data: UserEntity) -> Result[UserEntity]:
+    async def update_user_by_id(self, session: AsyncSession, user_data: UserEntity) -> Result[UserEntity]:
         user_model_mapped = await session.get(UserModel, user_data.id)
         if not user_model_mapped:
             return Result.fail("Usuario no existe", ErrorCode.USER_NOT_FOUND)
@@ -124,7 +121,7 @@ class UserRepository:
             )
         )
     
-    async def delete_user_by_id(session: AsyncSession, user_id: int) -> Result:
+    async def delete_user_by_id(self, session: AsyncSession, user_id: int) -> Result:
         user = await session.get(UserModel, user_id)
         if not user:
             return Result.fail("Usuario no encontrado", ErrorCode.USER_NOT_FOUND)
