@@ -53,6 +53,28 @@ class UserRepository(IUserRepository):
             )
         )
 
+    async def get_user_by_username(self, session: AsyncSession, username: str) -> Result[UserEntity]:
+        result = await session.execute(
+            select(UserModel).where(UserModel.username == username)
+        )
+        user = result.scalar_one_or_none()  # devuelve el primer registro o None
+        
+        if not user:
+            return Result.fail("Usuario no existe", ErrorCode.USER_NOT_FOUND)
+        
+        return Result.ok(
+            UserEntity(
+                id=user.id,
+                username=user.username,
+                password_hash=user.password_hash,
+                email=user.email,
+                created_at=user.created_at,
+                created_by=user.created_by,
+                updated_at=user.updated_at,
+                updated_by=user.updated_by,
+            )
+        )
+
     async def create_user(self, session: AsyncSession, user_data: UserEntity) -> Result[UserEntity]:
         # Mapeo del entity al modelo
         user = UserModel(

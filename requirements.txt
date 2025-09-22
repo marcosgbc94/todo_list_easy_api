@@ -17,10 +17,13 @@ pydantic-settings
 pydantic[email]
 
 # Seguridad
-passlib[bcrypt]
+passlib==1.7.4
+bcrypt==4.0.1
 python-jose
 
 # Testing
 pytest
 pytest-asyncio
 httpx
+
+python-multipart

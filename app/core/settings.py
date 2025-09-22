@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     DB_NAME: str
     API_SECRET_KEY: str
     MAX_DB_CONNECTION_WAIT: int
+    JWT_ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
 
     @property
     def DATABASE_URL(self) -> str:

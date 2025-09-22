@@ -1,6 +1,5 @@
 from typing import Annotated, TypeAlias
 from fastapi import Depends
-from data.repositories.user_repository import UserRepository
 from domain.services.user_service import UserService
 from presentation.api.dependencies.core_dependencies import DataBaseSessionDependency, UserRepositoryDependency
 

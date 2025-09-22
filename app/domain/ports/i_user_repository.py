@@ -12,6 +12,10 @@ class IUserRepository(ABC):
     @abstractmethod
     async def get_user_by_id(self, session: AsyncSession, user_id: int) -> Result[UserEntity]:
         raise NotImplementedError
+    
+    @abstractmethod
+    async def get_user_by_username(self, session: AsyncSession, username: str) -> Result[UserEntity]:
+        raise NotImplementedError
 
     @abstractmethod
     async def create_user(self, session: AsyncSession, user_data: UserEntity) -> Result[UserEntity]:
