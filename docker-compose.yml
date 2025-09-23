@@ -20,3 +20,32 @@ services:
       - database
     volumes:
       - ./app:/app
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: todolist_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus:/etc/prometheus
+    command: --config.file=/etc/prometheus/prometheus.yml
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: todolist_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: todolist_promtail
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/promtail:/etc/promtail
+    command: -config.file=/etc/promtail/promtail-config.yml

@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s # Con qué frecuencia recoger métricas
+
+scrape_configs:
+  - job_name: 'fastapi-app'
+    static_configs:
+      - targets: ['backend:8000'] # 'backend' es el nombre de tu servicio en docker-compose

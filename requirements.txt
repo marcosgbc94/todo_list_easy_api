@@ -27,3 +27,9 @@ pytest-asyncio
 httpx
 
 python-multipart
+
+# Observability
+prometheus-fastapi-instrumentator
+
+# Logging
+structlog
