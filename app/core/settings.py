@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     MAX_DB_CONNECTION_WAIT: int
     JWT_ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+    OBSERVABILITY_ENABLED: bool
 
     @property
     def DATABASE_URL(self) -> str:

@@ -1,25 +1,25 @@
 from fastapi import FastAPI
+from core.settings import settings
 from core.exceptions import ExceptionHandler
 from core.common import init_startup, get_app_name
-from presentation.api.router.v1 import user_router, auth_router 
-from prometheus_fastapi_instrumentator import Instrumentator
 from core.logging_config import setup_logging
+from presentation.api.router.v1 import user_router, auth_router
+from core.observability import setup_otel_providers, instrument_app
 
 setup_logging()
 
-# Nombre de la API
+if settings.OBSERVABILITY_ENABLED:
+    setup_otel_providers()
+
 app = FastAPI(title=get_app_name())
 
-Instrumentator().instrument(app).expose(app)
-
-# Se incluyen los routers
 app.include_router(user_router.router)
 app.include_router(auth_router.router)
-
-# Registrar los manejadores de errores
 ExceptionHandler.register(app)
 
-# Define acciones realizable cuando se ejecute la API por primera vez
 @app.on_event("startup")
 async def startup_event(): 
     await init_startup()
+
+if settings.OBSERVABILITY_ENABLED:
+    instrument_app(app)

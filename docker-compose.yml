@@ -49,3 +49,15 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/promtail:/etc/promtail
     command: -config.file=/etc/promtail/promtail-config.yml
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: todolist_jaeger
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
+      - "14268:14268"
+      - "4317:4317"        # Puerto para OTLP/gRPC
+      - "4318:4318"        # Puerto para OTLP/HTTP
+    environment: # <-- AÑADE ESTA SECCIÓN
+      - COLLECTOR_OTLP_ENABLED=true

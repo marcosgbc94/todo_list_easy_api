@@ -68,7 +68,7 @@ async def get_user_by_id(
         updated_by=user.updated_by
     )
 
-@router.get("/{user_id}", response_model=UserResponse)
+@router.get("/username/{username}", response_model=UserResponse)
 async def get_user_by_username(
     username: str, 
     user_service: UserServiceDependency,

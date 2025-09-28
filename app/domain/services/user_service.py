@@ -30,7 +30,7 @@ class UserService:
         return await self.repo.get_user_by_id(session=self.session, user_id=user_id)
 
     async def get_user_by_username(self, username: str) -> Result[UserEntity]:
-        return await self.repo.get_user_by_id(session=self.session, username=username)
+        return await self.repo.get_user_by_username(session=self.session, username=username)
 
     async def create_new_user(self, user_data: UserEntity, performed_by_id: int) -> Result[UserEntity]:
         if not user_data or not user_data.password:
