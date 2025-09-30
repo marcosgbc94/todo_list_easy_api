@@ -1,9 +1,9 @@
 from typing import Annotated, TypeAlias
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from core.security import decode_access_token
-from domain.entities.user_entity import UserEntity
-from presentation.api.dependencies.user_dependencies import UserServiceDependency
+from app.core.security import decode_access_token
+from app.domain.entities.user_entity import UserEntity
+from app.presentation.api.dependencies.user_dependencies import UserServiceDependency
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 

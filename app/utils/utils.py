@@ -1,4 +1,4 @@
-from data.datasource.database import Database
+from app.data.datasource.database import Database
 from datetime import datetime, timezone
 
 async def check_database_status(database: Database, max_wait_seconds: int = 30):

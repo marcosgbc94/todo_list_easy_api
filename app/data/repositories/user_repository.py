@@ -1,12 +1,12 @@
-from domain.ports.i_user_repository import IUserRepository
-from core.error_list import ErrorCode
-from core.result import Result
+from app.domain.ports.i_user_repository import IUserRepository
+from app.core.error_list import ErrorCode
+from app.core.result import Result
 from sqlalchemy import select
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from domain.entities.user_entity import UserEntity
-from data.models.user_model import UserModel
+from app.domain.entities.user_entity import UserEntity
+from app.data.models.user_model import UserModel
 
 class UserRepository(IUserRepository):
     async def get_users(self, session: AsyncSession) -> Result[List[UserEntity]]:

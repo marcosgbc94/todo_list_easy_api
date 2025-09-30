@@ -1,20 +1,19 @@
 # Dockerfile
 FROM python:3.11-slim
 
-# Crea directorio de trabajo
+# 1. Establece el directorio de trabajo principal del contenedor
 WORKDIR /app
 
-# Copia requirements
+# 3. Copia y instala las dependencias primero para aprovechar el caché de Docker
 COPY requirements.txt .
-
-# Instala dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia el código (solo en producción, en dev lo montamos con volumes)
-#COPY ./app /app
+# 4. Copia el resto del código de tu proyecto al contenedor
+COPY . .
 
-# Puerto
+# 5. Expone el puerto que usará la aplicación
 EXPOSE 8000
 
-# Comando por defecto
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# 6. Comando para iniciar la aplicación.
+#    Uvicorn ahora podrá encontrar 'app.main' porque /app está en el PYTHONPATH.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

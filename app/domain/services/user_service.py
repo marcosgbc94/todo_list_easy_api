@@ -1,10 +1,10 @@
 from typing import List, Optional
-from core.security import verify_password
+from app.core.security import verify_password
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.result import Result
-from core.error_list import ErrorCode
-from domain.entities.user_entity import UserEntity
-from domain.ports.i_user_repository import IUserRepository
+from app.core.result import Result
+from app.core.error_list import ErrorCode
+from app.domain.entities.user_entity import UserEntity
+from app.domain.ports.i_user_repository import IUserRepository
 
 class UserService:
     def __init__(self, user_repository: IUserRepository, database_session: AsyncSession):

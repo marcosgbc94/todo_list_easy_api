@@ -1,9 +1,13 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
+
+orm_config = ConfigDict(from_attributes=True)
 
 # Respuesta User por get
 class UserResponse(BaseModel):
+    model_config = orm_config
+
     id: int
     username: str
     email: EmailStr
@@ -20,6 +24,8 @@ class UserCreateRequest(BaseModel):
 
 # Respuesta al crear usuario
 class UserCreateResponse(BaseModel):
+    model_config = orm_config
+
     id: int
     username: str
     email: EmailStr
@@ -34,11 +40,10 @@ class UserUpdateRequest(BaseModel):
 
 # Respuesta al actualizar usuario
 class UserUpdateResponse(BaseModel):
+    model_config = orm_config
+
     id: int
     username: str
     email: EmailStr
     updated_at: Optional[datetime] = None
     updated_by: Optional[int] = None
-
-class Config:
-    orm_mode = True

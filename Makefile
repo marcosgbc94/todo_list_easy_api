@@ -1,36 +1,36 @@
-# Makefile para levantar todo el proyecto Todolist
-# ================================================
+# Makefile
+COMPOSE_BASE = docker-compose -f docker-compose.yml
+COMPOSE_OBS = $(COMPOSE_BASE) -f docker-compose.observability.yml
+COMPOSE_TEST = $(COMPOSE_BASE) -f docker-compose.test.yml
 
-# Variables
-COMPOSE = ./docker-compose.yml
-
-# Construir las imágenes sin levantar los contenedores
+# Construir la imagen base
 build:
-	docker compose -f $(COMPOSE) build
+	docker-compose build
 
-# Reconstruir desde cero (ignora cache)
-rebuild:
-	docker compose -f $(COMPOSE) build --no-cache
+# --- Entorno de Desarrollo ---
+# Levantar solo backend y BD de desarrollo
+up-dev:
+	$(COMPOSE_BASE) up -d --build
 
-# Levantar todos los servicios
-up:
-	docker compose -f $(COMPOSE) up -d
+# --- Entorno de Desarrollo con Observabilidad ---
+# Levantar todo: backend, BD dev y stack de observabilidad
+up-obs:
+	$(COMPOSE_OBS) up -d --build
 
-# Detener todos los servicios
+# --- Entorno de Testing ---
+# Levantar backend y BD de pruebas
+up-test:
+	$(COMPOSE_TEST) up -d --build
+
+# --- Comandos Generales ---
+# Detener todos los servicios de todos los archivos
 down:
-	docker compose -f $(COMPOSE) down
+	$(COMPOSE_OBS) -f docker-compose.test.yml down --remove-orphans
 
-# Reiniciar todo
-restart: down up
+restart: down up-obs
 
-# Ver logs de todos los servicios
 logs:
-	docker compose -f $(COMPOSE) logs -f
+	$(COMPOSE_OBS) logs -f
 
-# Entrar al contenedor de backend
 backend-shell:
 	docker exec -it todolist_backend bash
-
-# Entrar al contenedor de DB
-db-shell:
-	docker exec -it todolist_db psql -U $(DB_USER) -d $(DB_NAME)

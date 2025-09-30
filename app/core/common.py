@@ -1,6 +1,6 @@
-from core.settings import settings
-from data.datasource.database import database
-from utils.utils import check_database_status, create_tables_database
+from app.core.settings import settings
+from app.data.datasource.database import database
+from app.utils.utils import check_database_status, create_tables_database
 
 async def init_startup() -> bool:
     database_conected = await check_database_status(database=database, max_wait_seconds=settings.MAX_DB_CONNECTION_WAIT)

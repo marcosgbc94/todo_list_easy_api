@@ -1,7 +1,7 @@
 from typing import Annotated, TypeAlias
 from fastapi import Depends
-from domain.services.user_service import UserService
-from presentation.api.dependencies.core_dependencies import DataBaseSessionDependency, UserRepositoryDependency
+from app.domain.services.user_service import UserService
+from app.presentation.api.dependencies.core_dependencies import DataBaseSessionDependency, UserRepositoryDependency
 
 # Provedor de servicio
 def get_user_service(repository: UserRepositoryDependency, session: DataBaseSessionDependency) -> UserService:

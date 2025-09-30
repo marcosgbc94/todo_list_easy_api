@@ -1,10 +1,10 @@
 from typing import List
-from core.error_list import ErrorCode
-from domain.entities.user_entity import UserEntity
+from app.core.error_list import ErrorCode
+from app.domain.entities.user_entity import UserEntity
 from fastapi import APIRouter, HTTPException
-from presentation.schemas.user_schema import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest, UserUpdateResponse
-from presentation.api.dependencies.user_dependencies import UserServiceDependency
-from presentation.api.dependencies.auth_dependencies import CurrentUserDependency
+from app.presentation.schemas.user_schema import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest, UserUpdateResponse
+from app.presentation.api.dependencies.user_dependencies import UserServiceDependency
+from app.presentation.api.dependencies.auth_dependencies import CurrentUserDependency
 
 
 router = APIRouter(prefix="/users", tags=["users"])

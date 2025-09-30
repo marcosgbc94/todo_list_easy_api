@@ -1,5 +1,5 @@
 from typing import Generic, TypeVar, Optional
-from core.error_list import ErrorCode
+from app.core.error_list import ErrorCode
 
 T = TypeVar("T")
 
