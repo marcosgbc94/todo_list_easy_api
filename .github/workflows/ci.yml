@@ -47,7 +47,24 @@ jobs:
 
     - name: Esperar a que la base de datos de pruebas esté lista
       run: |
-        echo "Esperando a que la base de datos de pruebas esté saludable..."
+        echo "Esperando a que el contenedor 'todolist_test_db' exista..."
+        timeout=30
+        while [ $timeout -gt 0 ]; do
+          if [ "$(docker ps -q -f name=todolist_test_db)" ]; then
+            echo "Contenedor encontrado."
+            break
+          fi
+          sleep 2
+          timeout=$((timeout - 2))
+        done
+
+        if [ $timeout -le 0 ]; then
+          echo "Error: El contenedor 'todolist_test_db' no se inició en 30 segundos."
+          docker compose ps
+          exit 1
+        fi
+
+        echo "Esperando a que la base de datos se vuelva saludable..."
         timeout=60
         while [ $timeout -gt 0 ]; do
           status=$(docker inspect --format '{{.State.Health.Status}}' todolist_test_db)
@@ -60,6 +77,7 @@ jobs:
           timeout=$((timeout - 5))
         done
         echo "Error: La base de datos no se volvió saludable en 1 minuto."
+        docker compose logs test_database
         exit 1
 
     - name: Ejecutar Pytest dentro del contenedor
