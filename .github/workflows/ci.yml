@@ -23,13 +23,13 @@ jobs:
       run: pip install -r requirements.txt
 
     - name: Levantar servicios de prueba con Docker Compose
-      run: docker-compose --profile test up -d
+      run: docker compose --profile test up -d
 
     - name: Esperar a que la base de datos de pruebas esté lista
       run: sleep 10 # Una espera simple pero efectiva para entornos de CI
 
     - name: Ejecutar Pytest dentro del contenedor
-      run: docker-compose exec -T backend pytest tests/
+      run: docker compose exec -T backend pytest tests/
 
   build-and-push:
     runs-on: ubuntu-latest

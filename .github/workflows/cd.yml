@@ -16,4 +16,4 @@ jobs:
       run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todolist-api:latest
 
     - name: Reiniciar los servicios con la nueva imagen (Modo Desarrollo)
-      run: docker-compose --profile dev down && docker-compose --profile dev up -d
+      run: docker compose --profile dev down && docker compose --profile dev up -d
