@@ -43,7 +43,7 @@ jobs:
         echo "DB=postgres" >> .env
 
     - name: Levantar servicios de prueba con Docker Compose
-      run: docker compose --profile test up -d
+      run: docker compose --profile test up -d backend test_database
 
     - name: Esperar a que la base de datos de pruebas esté lista
       run: |
