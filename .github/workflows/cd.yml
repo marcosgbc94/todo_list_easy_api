@@ -1,0 +1,19 @@
+name: Continuous Deployment (Local)
+
+on:
+  push:
+    branches: [ main ] # Se activa solo en la rama principal
+
+jobs:
+  deploy-local:
+    runs-on: self-hosted # <-- ¡La clave! Este job se ejecuta en TU máquina.
+
+    steps:
+    - name: Navegar al directorio del proyecto
+      run: cd C:\dev\todo_list_easy # <-- ¡Usa la ruta a tu proyecto!
+
+    - name: Descargar la última imagen de Docker Hub
+      run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todolist-api:latest
+
+    - name: Reiniciar los servicios con la nueva imagen (Modo Desarrollo)
+      run: docker-compose --profile dev down && docker-compose --profile dev up -d
