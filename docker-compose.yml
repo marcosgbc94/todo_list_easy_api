@@ -40,7 +40,7 @@ services:
     volumes:
       - .:/app # Monta proyecto entero solo para DEV, para PROD solo montar /app
       - /var/run/docker.sock:/var/run/docker.sock
-    profiles: ["dev"]
+    profiles: ["dev", "test"]
     networks:
       - app-network
 
