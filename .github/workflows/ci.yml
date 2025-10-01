@@ -46,7 +46,7 @@ jobs:
       run: docker compose --profile test up -d
 
     - name: Esperar a que la base de datos de pruebas esté lista
-      run: sleep 10 # Una espera simple pero efectiva para entornos de CI
+      run: docker compose ps --filter "health=healthy" --filter "name=todolist_test_db" | grep "healthy"
 
     - name: Ejecutar Pytest dentro del contenedor
       run: docker compose exec -T backend pytest tests/
