@@ -46,7 +46,21 @@ jobs:
       run: docker compose --profile test up -d
 
     - name: Esperar a que la base de datos de pruebas esté lista
-      run: docker compose ps --filter "health=healthy" --filter "name=todolist_test_db" | grep "healthy"
+      run: |
+        echo "Esperando a que la base de datos de pruebas esté saludable..."
+        timeout=60
+        while [ $timeout -gt 0 ]; do
+          status=$(docker inspect --format '{{.State.Health.Status}}' todolist_test_db)
+          if [ "$status" = "healthy" ]; then
+            echo "¡Base de datos lista!"
+            exit 0
+          fi
+          echo "La base de datos todavía no está lista (estado: $status), esperando 5 segundos..."
+          sleep 5
+          timeout=$((timeout - 5))
+        done
+        echo "Error: La base de datos no se volvió saludable en 1 minuto."
+        exit 1
 
     - name: Ejecutar Pytest dentro del contenedor
       run: docker compose exec -T backend pytest tests/
