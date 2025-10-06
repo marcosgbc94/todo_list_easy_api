@@ -9,6 +9,25 @@ user [icon: user, color: blue] {
   updated_by int
 }
 
+role [icon: users, color: purple] {
+  id int pk
+  name unique string
+  description string
+  created_at datetime
+  created_by int
+  updated_at datetime
+  updated_by int
+}
+
+user_role [] {
+  user_id int pk
+  role_id int pk
+  created_at datetime
+  created_by int
+  updated_at datetime
+  updated_by int
+}
+
 status [] {
   id int pk
   name string
@@ -53,8 +72,8 @@ tag [icon: tag, color: green] {
 }
 
 tasktag [icon: folder, color: yellow] {
-  task_id int
-  tag_id int
+  task_id int pk
+  tag_id int pk
   created_at datetime
   created_by int
   updated_at datetime
@@ -62,6 +81,9 @@ tasktag [icon: folder, color: yellow] {
 }
 
 user.id < task.user_id
+user.id < user_role.user_id
+role.id < user_role.role_id
+
 task.id < tasktag.task_id
 tag.id < tasktag.tag_id
 status.id - task.status_id

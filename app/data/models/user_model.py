@@ -1,14 +1,20 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from app.data.datasource.database import database
+from typing import List
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-class UserModel(database.Base):
+from app.data.datasource.database import database
+from app.data.models.audit_mixin import AuditMixin 
+
+class UserModel(database.Base, AuditMixin):
     __tablename__ = "user"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    username = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
-    password_hash = Column(String)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    created_by = Column(Integer, nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=True)
-    updated_by = Column(Integer, nullable=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    
+    roles: Mapped[List["Role"]] = relationship("Role", secondary="user_role", back_populates="users")
+    tasks: Mapped[List["Task"]] = relationship("Task", back_populates="owner")
+
+    def __repr__(self):
+        return f"<User(id={self.id}, username='{self.username}')>"
