@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.exceptions import ExceptionHandler
 from app.core.common import init_startup, get_app_name
 from app.core.logging_config import setup_logging
-from app.presentation.api.router.v1 import user_router, auth_router
+from app.presentation.api.router.v1 import user_router, auth_router, task_router
 from app.core.observability import setup_otel_providers, instrument_app
 
 setup_logging()
@@ -16,6 +16,7 @@ app = FastAPI(title=get_app_name())
 
 app.include_router(user_router.router)
 app.include_router(auth_router.router)
+app.include_router(task_router.router)
 ExceptionHandler.register(app)
 
 @asynccontextmanager

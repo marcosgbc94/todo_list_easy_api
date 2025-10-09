@@ -96,6 +96,25 @@ services:
     networks:
       - app-network
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: todolist_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@localhost.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "8888:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - app-network
+    depends_on:
+      - database
+    profiles: ["dev"]
+
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  pgadmin_data:
