@@ -112,9 +112,25 @@ services:
       - database
     profiles: ["dev"]
 
+  n8n:
+    image: n8nio/n8n
+    container_name: todolist_n8n
+    environment:
+      - GENERIC_TIMEZONE=America/Santiago
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    profiles: ["dev", "obs"]
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
   pgadmin_data:
+  n8n_data:

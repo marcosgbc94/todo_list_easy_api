@@ -13,8 +13,8 @@ class UserModel(database.Base, AuditMixin):
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     
-    roles: Mapped[List["Role"]] = relationship("Role", secondary="user_role", back_populates="users")
-    tasks: Mapped[List["Task"]] = relationship("Task", back_populates="owner")
+    roles: Mapped[List["RoleModel"]] = relationship("RoleModel", secondary="user_role", back_populates="users")
+    tasks: Mapped[List["TaskModel"]] = relationship("TaskModel", back_populates="owner")
 
     def __repr__(self):
         return f"<User(id={self.id}, username='{self.username}')>"

@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from typing import List
-from app.presentation.api.dependencies.user_dependencies import UserServiceDependency # Reutilizamos
 from app.presentation.api.dependencies.auth_dependencies import CurrentUserDependency
 from app.domain.entities.task_entity import TaskEntity
 from app.presentation.schemas.task_schema import TaskCreateRequest, TaskResponse, TaskUpdateRequest
@@ -27,7 +26,6 @@ async def get_my_tasks(
 ):
     result = await task_service.get_tasks_for_user(current_user.id)
     if not result.success:
-        # Si no tiene tareas, devolvemos una lista vacía en lugar de un error 404
         return []
     return result.data
 

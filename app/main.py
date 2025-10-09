@@ -12,17 +12,17 @@ setup_logging()
 if settings.OBSERVABILITY_ENABLED:
     setup_otel_providers()
 
-app = FastAPI(title=get_app_name())
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_startup()
+    yield
+
+app = FastAPI(title=get_app_name(), lifespan=lifespan)
 
 app.include_router(user_router.router)
 app.include_router(auth_router.router)
 app.include_router(task_router.router)
 ExceptionHandler.register(app)
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await init_startup()
-    yield
 
 if settings.OBSERVABILITY_ENABLED:
     instrument_app(app)

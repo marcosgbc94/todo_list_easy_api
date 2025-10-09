@@ -12,7 +12,7 @@ class RoleModel(database.Base, AuditMixin):
     name: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
-    users: Mapped[List["User"]] = relationship("User", secondary="user_role", back_populates="roles")
+    users: Mapped[List["UserModel"]] = relationship("UserModel", secondary="user_role", back_populates="roles")
 
     def __repr__(self):
         return f"<Role(id={self.id}, name='{self.name}')>"

@@ -13,7 +13,7 @@ class StatusModel(database.Base, AuditMixin):
     name: Mapped[str] = mapped_column(String(50), unique=True)
     color: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
 
-    tasks: Mapped[List["Task"]] = relationship("Task", back_populates="status_type")
+    tasks: Mapped[List["TaskModel"]] = relationship("TaskModel", back_populates="status_type")
 
     def __repr__(self):
         return f"<Status(id={self.id}, name='{self.name}')>"

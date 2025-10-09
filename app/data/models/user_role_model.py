@@ -10,8 +10,8 @@ class UserRoleModel(database.Base, AuditMixin):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'), primary_key=True)
     role_id: Mapped[int] = mapped_column(Integer, ForeignKey('role.id'), primary_key=True)
 
-    user: Mapped["User"] = relationship("User", backref="user_roles_link")
-    role: Mapped["Role"] = relationship("Role", backref="role_users_link")
+    user: Mapped["UserModel"] = relationship("UserModel", backref="user_roles_link")
+    role: Mapped["RoleModel"] = relationship("RoleModel", backref="role_users_link")
 
     def __repr__(self):
         return f"<UserRole(user_id={self.user_id}, role_id={self.role_id})>"
