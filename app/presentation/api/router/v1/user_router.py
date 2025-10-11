@@ -1,15 +1,15 @@
 from typing import List
 from app.core.error_list import ErrorCode
 from app.domain.entities.user_entity import UserEntity
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends 
 from app.presentation.schemas.user_schema import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest, UserUpdateResponse
 from app.presentation.api.dependencies.user_dependencies import UserServiceDependency
-from app.presentation.api.dependencies.auth_dependencies import CurrentUserDependency
+from app.presentation.api.dependencies.auth_dependencies import CurrentUserDependency, require_role
 
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-@router.get("", response_model=List[UserResponse])
+@router.get("", response_model=List[UserResponse], dependencies=[Depends(require_role(["admin"]))])
 async def get_users(
     user_service: UserServiceDependency, 
     current_user: CurrentUserDependency
@@ -96,7 +96,7 @@ async def get_user_by_username(
         updated_by=user.updated_by
     )
 
-@router.post("", response_model=UserCreateResponse)
+@router.post("", response_model=UserCreateResponse, dependencies=[Depends(require_role(["admin"]))])
 async def create_user(
     user_data: UserCreateRequest, 
     user_service: UserServiceDependency,
@@ -129,7 +129,7 @@ async def create_user(
         created_by=user.created_by
     )
 
-@router.put("/{user_id}", response_model=UserUpdateResponse)
+@router.put("/{user_id}", response_model=UserUpdateResponse, dependencies=[Depends(require_role(["admin"]))])
 async def update_user_by_id(
     user_id: int, 
     user_update: UserUpdateRequest, 
@@ -164,7 +164,7 @@ async def update_user_by_id(
         updated_by=user.updated_by
     )
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}", dependencies=[Depends(require_role(["admin"]))])
 async def delete_user(
     user_id: int, 
     user_service: UserServiceDependency,

@@ -5,6 +5,8 @@ from app.core.error_list import ErrorCode
 from app.domain.entities.task_entity import TaskEntity
 from app.domain.ports.i_task_repository import ITaskRepository
 from app.data.models.task_model import TaskModel
+from app.data.models.tag_model import TagModel
+from sqlalchemy.orm import selectinload
 from typing import List
 
 class TaskRepository(ITaskRepository):
@@ -67,5 +69,37 @@ class TaskRepository(ITaskRepository):
             return Result.fail("Tarea no encontrada", ErrorCode.INTERNAL_ERROR)
         
         await session.delete(task)
+        await session.commit()
+        return Result.ok()
+    
+    async def add_tag_to_task(self, session: AsyncSession, task_id: int, tag_id: int) -> Result:
+        task = await session.get(TaskModel, task_id, options=[selectinload(TaskModel.tags)])
+        if not task:
+            return Result.fail("Tarea no encontrada", ErrorCode.INTERNAL_ERROR) # Deberías crear un ErrorCode.TASK_NOT_FOUND
+        
+        tag = await session.get(TagModel, tag_id)
+        if not tag:
+            return Result.fail("Etiqueta no encontrada", ErrorCode.TAG_NOT_FOUND)
+
+        if tag in task.tags:
+            return Result.fail("La tarea ya tiene esta etiqueta", ErrorCode.TAG_ALREADY_EXISTS)
+
+        task.tags.append(tag)
+        await session.commit()
+        return Result.ok()
+
+    async def remove_tag_from_task(self, session: AsyncSession, task_id: int, tag_id: int) -> Result:
+        task = await session.get(TaskModel, task_id, options=[selectinload(TaskModel.tags)])
+        if not task:
+            return Result.fail("Tarea no encontrada", ErrorCode.INTERNAL_ERROR)
+        
+        tag = await session.get(TagModel, tag_id)
+        if not tag:
+            return Result.fail("Etiqueta no encontrada", ErrorCode.TAG_NOT_FOUND)
+
+        if tag not in task.tags:
+            return Result.fail("La tarea no tiene esta etiqueta", ErrorCode.TAG_NOT_FOUND)
+
+        task.tags.remove(tag)
         await session.commit()
         return Result.ok()

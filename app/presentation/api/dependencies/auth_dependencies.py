@@ -1,4 +1,4 @@
-from typing import Annotated, TypeAlias
+from typing import Annotated, TypeAlias, List
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from app.core.security import decode_access_token
@@ -28,5 +28,16 @@ async def get_current_user(
         raise credentials_exception
         
     return result.data
+
+def require_role(required_roles: List[str]):
+    async def role_checker(current_user: CurrentUserDependency) -> None:
+        user_role_names = {role.name for role in current_user.roles}
+        
+        if not set(required_roles) & user_role_names:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes permisos suficientes para realizar esta acción.",
+            )
+    return role_checker
 
 CurrentUserDependency: TypeAlias = Annotated[UserEntity, Depends(get_current_user)]

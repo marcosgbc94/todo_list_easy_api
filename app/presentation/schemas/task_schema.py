@@ -24,3 +24,6 @@ class TaskResponse(TaskBase):
     user_id: int
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
+
+class TaskTagRequest(BaseModel):
+    tag_id: int

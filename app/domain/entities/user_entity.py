@@ -1,14 +1,15 @@
-from typing import Optional
 from app.core.security import hash_password
 from datetime import datetime, timezone
-from typing import Optional
 from app.core.security import hash_password
+from typing import Optional, List
+from app.domain.entities.role_entity import RoleEntity
 
 class UserEntity:
     def __init__(
         self,
         id: Optional[int] = None,
         username: Optional[str] = None,
+        roles: Optional[List[RoleEntity]] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
         password_hash: Optional[str] = None,
@@ -20,6 +21,7 @@ class UserEntity:
         self.id = id
         self.username = username
         self.email = email
+        self.roles = roles or []
         self.password = password
         self.password_hash = password_hash
         self.created_at = created_at

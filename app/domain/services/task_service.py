@@ -1,4 +1,5 @@
 from typing import List
+from app.core.error_list import ErrorCode
 from app.core.result import Result
 from app.domain.entities.task_entity import TaskEntity
 from app.domain.ports.i_task_repository import ITaskRepository
@@ -26,7 +27,7 @@ class TaskService:
         # Verificación de que el usuario es dueño de la tarea
         result = await self.repo.get_task_by_id(self.session, task_id)
         if not result.success or result.data.user_id != user_id:
-             return Result.fail("No autorizado para modificar esta tarea", ErrorCode.INTERNAL_ERROR) # Deberías crear un ErrorCode.UNAUTHORIZED
+             return Result.fail("No autorizado para modificar esta tarea", ErrorCode.UNAUTHORIZED)
 
         task_data.id = task_id
         task_data.updated_by = user_id
@@ -37,6 +38,22 @@ class TaskService:
         # Verificación de que el usuario es dueño de la tarea
         result = await self.repo.get_task_by_id(self.session, task_id)
         if not result.success or result.data.user_id != user_id:
-             return Result.fail("No autorizado para eliminar esta tarea", ErrorCode.INTERNAL_ERROR)
+             return Result.fail("No autorizado para eliminar esta tarea", ErrorCode.UNAUTHORIZED)
 
         return await self.repo.delete_task(self.session, task_id)
+    
+    async def add_tag(self, task_id: int, tag_id: int, user_id: int) -> Result:
+            # Primero, verificamos que el usuario sea el dueño de la tarea
+            task_result = await self.repo.get_task_by_id(self.session, task_id)
+            if not task_result.success or task_result.data.user_id != user_id:
+                return Result.fail("No autorizado para modificar esta tarea.", ErrorCode.UNAUTHORIZED)
+            
+            return await self.repo.add_tag_to_task(self.session, task_id, tag_id)
+
+    async def remove_tag(self, task_id: int, tag_id: int, user_id: int) -> Result:
+        # Verificamos la propiedad de la tarea
+        task_result = await self.repo.get_task_by_id(self.session, task_id)
+        if not task_result.success or task_result.data.user_id != user_id:
+            return Result.fail("No autorizado para modificar esta tarea.", ErrorCode.UNAUTHORIZED)
+        
+        return await self.repo.remove_tag_from_task(self.session, task_id, tag_id)

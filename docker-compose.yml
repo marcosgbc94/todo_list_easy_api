@@ -127,6 +127,17 @@ services:
       - backend
     profiles: ["dev", "obs"]
 
+  ollama:
+    image: ollama/ollama
+    container_name: todolist_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - app-network
+    profiles: ["dev", "obs"]
+
 networks:
   app-network:
     driver: bridge
@@ -134,3 +145,4 @@ networks:
 volumes:
   pgadmin_data:
   n8n_data:
+  ollama_data:

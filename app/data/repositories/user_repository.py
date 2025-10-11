@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from app.domain.entities.user_entity import UserEntity
 from app.data.models.user_model import UserModel
+from sqlalchemy.orm import selectinload
+from app.domain.entities.role_entity import RoleEntity
 
 class UserRepository(IUserRepository):
     async def get_users(self, session: AsyncSession) -> Result[List[UserEntity]]:
@@ -34,24 +36,30 @@ class UserRepository(IUserRepository):
 
     async def get_user_by_id(self, session: AsyncSession, user_id: int) -> Result[UserEntity]:
         result = await session.execute(
-            select(UserModel).where(UserModel.id == user_id)
+            select(UserModel)
+            .where(UserModel.id == user_id)
+            .options(selectinload(UserModel.roles))
         )
         user = result.scalar_one_or_none()  # devuelve el primer registro o None
 
         if not user:
             return Result.fail("Usuario no existe", ErrorCode.USER_NOT_FOUND)
         
-        return Result.ok(
-            UserEntity(
-                id=user.id,
-                username=user.username,
-                email=user.email,
-                created_at=user.created_at,
-                created_by=user.created_by,
-                updated_at=user.updated_at,
-                updated_by=user.updated_by,
-            )
+        user_entity = UserEntity(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            created_at=user.created_at,
+            created_by=user.created_by,
+            updated_at=user.updated_at,
+            updated_by=user.updated_by,
         )
+        
+        # Se convierte los RoleModel a RoleEntity
+        if user.roles:
+            user_entity.roles = [RoleEntity(**role.__dict__) for role in user.roles]
+
+        return Result.ok(user_entity)
 
     async def get_user_by_username(self, session: AsyncSession, username: str) -> Result[UserEntity]:
         result = await session.execute(

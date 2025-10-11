@@ -24,3 +24,11 @@ class ITaskRepository(ABC):
     @abstractmethod
     async def delete_task(self, session: AsyncSession, task_id: int) -> Result:
         raise NotImplementedError
+    
+    @abstractmethod
+    async def add_tag_to_task(self, session: AsyncSession, task_id: int, tag_id: int) -> Result:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def remove_tag_from_task(self, session: AsyncSession, task_id: int, tag_id: int) -> Result:
+        raise NotImplementedError
