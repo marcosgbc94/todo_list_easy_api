@@ -1,13 +1,17 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from typing import List
-from app.presentation.api.dependencies.auth_dependencies import CurrentUserDependency
+
 from app.domain.entities.task_entity import TaskEntity
-from app.presentation.schemas.task_schema import TaskCreateRequest, TaskResponse, TaskUpdateRequest, TaskTagRequest
-from app.presentation.api.dependencies.task_dependencies import TaskServiceDependency 
+from app.presentation.schemas.task_schema import (
+    TaskCreateRequest, TaskResponse, TaskUpdateRequest, TaskTagRequest
+)
+from app.presentation.api.dependencies.task_dependencies import TaskServiceDependency
+from app.presentation.api.dependencies.auth_dependencies import CurrentUserDependency
+from app.presentation.api.responses import handle_result
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
-@router.post("", response_model=TaskResponse)
+@router.post("", response_model=TaskResponse, status_code=201)
 async def create_task(
     task_data: TaskCreateRequest,
     task_service: TaskServiceDependency,
@@ -15,9 +19,8 @@ async def create_task(
 ):
     task_entity = TaskEntity(**task_data.model_dump())
     result = await task_service.create_task_for_user(task_entity, current_user.id)
-    if not result.success:
-        raise HTTPException(status_code=400, detail=result.error)
-    return result.data
+    task = handle_result(result)
+    return TaskResponse(**task.__dict__)
 
 @router.get("", response_model=List[TaskResponse])
 async def get_my_tasks(
@@ -25,9 +28,12 @@ async def get_my_tasks(
     current_user: CurrentUserDependency
 ):
     result = await task_service.get_tasks_for_user(current_user.id)
+
     if not result.success:
         return []
-    return result.data
+    
+    tasks = result.data
+    return [TaskResponse(**task.__dict__) for task in tasks]
 
 @router.put("/{task_id}", response_model=TaskResponse)
 async def update_task(
@@ -38,20 +44,18 @@ async def update_task(
 ):
     task_entity = TaskEntity(**task_data.model_dump())
     result = await task_service.update_task(task_entity, task_id, current_user.id)
-    if not result.success:
-        raise HTTPException(status_code=400, detail=result.error)
-    return result.data
-    
-@router.delete("/{task_id}")
+    task = handle_result(result)
+    return TaskResponse(**task.__dict__)
+
+@router.delete("/{task_id}", status_code=204)
 async def delete_task(
     task_id: int,
     task_service: TaskServiceDependency,
     current_user: CurrentUserDependency
 ):
     result = await task_service.delete_task(task_id, current_user.id)
-    if not result.success:
-        raise HTTPException(status_code=404, detail=result.error)
-    return {"detail": "Tarea eliminada correctamente"}
+    handle_result(result)
+    return None
 
 @router.post("/{task_id}/tags", status_code=204)
 async def add_tag_to_task(
@@ -61,9 +65,8 @@ async def add_tag_to_task(
     current_user: CurrentUserDependency
 ):
     result = await task_service.add_tag(task_id, request.tag_id, current_user.id)
-    if not result.success:
-        raise HTTPException(status_code=404, detail=result.error)
-    return {"detail": "Tag agregado correctamente a tarea"}
+    handle_result(result)
+    return None
 
 @router.delete("/{task_id}/tags/{tag_id}", status_code=204)
 async def remove_tag_from_task(
@@ -73,6 +76,5 @@ async def remove_tag_from_task(
     current_user: CurrentUserDependency
 ):
     result = await task_service.remove_tag(task_id, tag_id, current_user.id)
-    if not result.success:
-        raise HTTPException(status_code=404, detail=result.error)
-    return {"detail": "Tag removido correctamente de tarea"}
+    handle_result(result)
+    return None

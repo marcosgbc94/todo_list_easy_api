@@ -1,72 +1,122 @@
+from fastapi import APIRouter, HTTPException, Depends 
 from typing import List
+
 from app.core.error_list import ErrorCode
 from app.domain.entities.user_entity import UserEntity
-from fastapi import APIRouter, HTTPException, Depends 
+from app.presentation.api.responses import handle_result
 from app.presentation.schemas.user_schema import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest, UserUpdateResponse
 from app.presentation.api.dependencies.user_dependencies import UserServiceDependency
 from app.presentation.api.dependencies.auth_dependencies import CurrentUserDependency, require_role
-
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("", response_model=List[UserResponse], dependencies=[Depends(require_role(["admin"]))])
 async def get_users(
-    user_service: UserServiceDependency, 
-    current_user: CurrentUserDependency
+    user_service: UserServiceDependency
 ):
     result = await user_service.get_all_users()
+    users = handle_result(result)
 
-    # Comprobar errores
-    if not result.success:
-        if result.code == ErrorCode.USERS_NOT_FOUND:
-            raise HTTPException(status_code=404, detail=result.error)
-        else:
-            raise HTTPException(status_code=500, detail="Error interno")
-    
-    users = result.data
-    
-    # Retornar en formato UserResponse (Schema)
     return [
-        UserResponse(
-            id=user.id,
-            username=user.username,
-            email=user.email,
-            created_at=user.created_at,
-            created_by=user.created_by,
-            updated_at=user.updated_at,
-            updated_by=user.updated_by
-        )
-        for user in users
+        UserResponse(**user.__dict__) for user in users
     ]
 
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user_by_id(
-    user_id: int, 
+    user_id: int,
     user_service: UserServiceDependency,
     current_user: CurrentUserDependency
 ):
+    user_roles = {
+        role.name for role in current_user.roles
+    }
+
+    if "admin" not in user_roles and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="No tienes permisos para ver a este usuario.")
+
     result = await user_service.get_user_by_id(user_id=user_id)
+    user = handle_result(result)
 
-    # Comprobar errores
+    return UserResponse(**user.__dict__)
 
-    if not result.success:
-        if result.code == ErrorCode.USER_NOT_FOUND:
-            raise HTTPException(status_code=404, detail=result.error)
-        else:
-            raise HTTPException(status_code=500, detail="Error interno")
-    
-    user = result.data
+@router.get("/username/{username}", response_model=UserResponse)
+async def get_user_by_username(
+    username: str,
+    user_service: UserServiceDependency,
+    current_user: CurrentUserDependency
+):
+    result = await user_service.get_user_by_username(username=username)
+    user = handle_result(result)
 
-    # Retornar en formato UserResponse (Schema)
-    return UserResponse(
-        id=user.id,
-        username=user.username,
-        email=user.email,
-        created_at=user.created_at,
-        created_by=user.created_by,
-        updated_at=user.updated_at,
-        updated_by=user.updated_by
+    user_roles = {role.name for role in current_user.roles}
+
+    if "admin" not in user_roles and current_user.id != user.id:
+         raise HTTPException(status_code=403, detail="No tienes permisos para ver a este usuario.")
+
+    return UserResponse(**user.__dict__)
+
+@router.post("", response_model=UserCreateResponse, dependencies=[Depends(require_role(["admin"]))])
+async def create_user(
+    user_data: UserCreateRequest,
+    user_service: UserServiceDependency,
+    current_user: CurrentUserDependency
+):
+    user_entity_mapped = UserEntity(**user_data.model_dump())
+    result = await user_service.create_new_user(user_data=user_entity_mapped, performed_by_id=current_user.id)
+    user = handle_result(result)
+    return UserCreateResponse(**user.__dict__)
+
+@router.put("/{user_id}", response_model=UserUpdateResponse, dependencies=[Depends(require_role(["admin"]))])
+async def update_user_by_id(
+    user_id: int,
+    user_update: UserUpdateRequest,
+    user_service: UserServiceDependency,
+    current_user: CurrentUserDependency
+):
+    user_entity_mapper = UserEntity(id=user_id, **user_update.model_dump())
+
+    result = await user_service.update_existing_user(
+        user_id=user_id,
+        user_data=user_entity_mapper,
+        performed_by_id=current_user.id
     )
+
+    user = handle_result(result)
+
+    return UserUpdateResponse(**user.__dict__)
+
+@router.delete("/{user_id}", status_code=204, dependencies=[Depends(require_role(["admin"]))])
+async def delete_user(
+    user_id: int,
+    user_service: UserServiceDependency
+):
+    result = await user_service.delete_user_by_id(user_id=user_id)
+    
+    if not result.success and result.code == ErrorCode.RESOURCE_IN_USE:
+        raise HTTPException(status_code=409, detail=result.error)
+    
+    handle_result(result)
+    
+    return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @router.get("/username/{username}", response_model=UserResponse)
 async def get_user_by_username(

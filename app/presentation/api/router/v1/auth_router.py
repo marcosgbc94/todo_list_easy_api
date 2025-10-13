@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
+
 from app.core.security import create_access_token
 from app.presentation.api.dependencies.user_dependencies import UserServiceDependency
 from app.presentation.schemas.user_auth_schema import UserAuthResponse
+from app.presentation.api.responses import handle_result
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -16,15 +18,8 @@ async def login_for_access_token(
         username=form_data.username, 
         password=form_data.password
     )
-    
-    user = result.data
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuario o contraseña incorrectos",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+  
+    user = handle_result(result)
     
     access_token = create_access_token(data={"sub": str(user.id)})
 

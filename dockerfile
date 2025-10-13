@@ -1,19 +1,34 @@
-# Dockerfile
-FROM python:3.11-slim
+# --- Etapa 1: BASE ---
 
-# 1. Establece el directorio de trabajo principal del contenedor
+# Instala las dependencias (común entre dev y prod)
+FROM python:3.11-slim as BASE
+
+# Establece el directorio de trabajo
 WORKDIR /app
 
-# 3. Copia y instala las dependencias primero para aprovechar el caché de Docker
+# Instala dependencias
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 4. Copia el resto del código de tu proyecto al contenedor
-COPY . .
+# --- Etapa 2: PRODUCCIÓN ---
 
-# 5. Expone el puerto que usará la aplicación
+# Esta etapa crea la imagen final y optimizada para producción.
+FROM BASE AS PROD
+
+# Copia solo el código necesario de la aplicación
+COPY ./app /app/app
+COPY ./main.py /app/main.py
+
+# Comando para iniciar la aplicación en modo producción (sin --reload)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# --- Etapa 3: DESARROLLO ---
+
+# Esta etapa se usa solo para el entorno de desarrollo local.
+FROM BASE AS DEV
+
+# Expone el puerto
 EXPOSE 8000
 
-# 6. Comando para iniciar la aplicación.
-#    Uvicorn ahora podrá encontrar 'app.main' porque /app está en el PYTHONPATH.
+# Comando para iniciar la aplicación con recarga automática
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

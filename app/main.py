@@ -1,7 +1,8 @@
-from app.data.datasource import database
 from fastapi import FastAPI
-from app.core.settings import settings
 from contextlib import asynccontextmanager
+
+from app.data.datasource import database
+from app.core.settings import settings
 from app.core.exceptions import ExceptionHandler
 from app.core.common import init_startup, get_app_name
 from app.core.logging_config import setup_logging
@@ -32,6 +33,7 @@ app.include_router(status_router.router)
 app.include_router(priority_router.router)
 app.include_router(tag_router.router)
 app.include_router(role_router.router)
+
 ExceptionHandler.register(app)
 
 if settings.OBSERVABILITY_ENABLED:
