@@ -12,7 +12,7 @@ class TagModel(database.Base, AuditMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(50), unique=True)
 
-    tasks: Mapped[List["TaskModel"]] = relationship("TaskModel", secondary="tasktag", back_populates="tags")
+    tasks: Mapped[List["TaskModel"]] = relationship("TaskModel", secondary="tasktag", back_populates="tags", lazy="raise_on_sql")
 
     def __repr__(self):
         return f"<Tag(id={self.id}, name='{self.name}')>"

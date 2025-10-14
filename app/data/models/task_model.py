@@ -18,10 +18,10 @@ class TaskModel(database.Base, AuditMixin):
     priority_id: Mapped[int] = mapped_column(Integer, ForeignKey('priority.id'))
     due_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True)
 
-    owner: Mapped["UserModel"] = relationship("UserModel", back_populates="tasks")
-    status_type: Mapped["StatusModel"] = relationship("StatusModel", back_populates="tasks")
-    priority_level: Mapped["PriorityModel"] = relationship("PriorityModel", back_populates="tasks")
-    tags: Mapped[List["TagModel"]] = relationship("TagModel", secondary="tasktag", back_populates="tasks")
+    owner: Mapped["UserModel"] = relationship("UserModel", back_populates="tasks", lazy="raise_on_sql")
+    status_type: Mapped["StatusModel"] = relationship("StatusModel", back_populates="tasks", lazy="raise_on_sql")
+    priority_level: Mapped["PriorityModel"] = relationship("PriorityModel", back_populates="tasks", lazy="raise_on_sql")
+    tags: Mapped[List["TagModel"]] = relationship("TagModel", secondary="tasktag", back_populates="tasks", lazy="raise_on_sql")
 
     def __repr__(self):
         return f"<Task(id={self.id}, title='{self.title}', user_id={self.user_id})>"

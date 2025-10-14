@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from app.data.datasource import database
+from app.data.datasource.database import database
 from app.core.settings import settings
 from app.core.exceptions import ExceptionHandler
 from app.core.common import init_startup, get_app_name

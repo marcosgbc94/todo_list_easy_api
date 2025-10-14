@@ -13,7 +13,7 @@ class PriorityModel(database.Base, AuditMixin):
     name: Mapped[str] = mapped_column(String(50), unique=True)
     color: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
 
-    tasks: Mapped[List["TaskModel"]] = relationship("TaskModel", back_populates="priority_level")
+    tasks: Mapped[List["TaskModel"]] = relationship("TaskModel", back_populates="priority_level", lazy="raise_on_sql")
 
     def __repr__(self):
         return f"<Priority(id={self.id}, name='{self.name}')>"

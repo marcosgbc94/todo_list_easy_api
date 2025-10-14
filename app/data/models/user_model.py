@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.data.datasource.database import database
@@ -13,8 +13,8 @@ class UserModel(database.Base, AuditMixin):
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     
-    roles: Mapped[List["RoleModel"]] = relationship("RoleModel", secondary="user_role", back_populates="users")
-    tasks: Mapped[List["TaskModel"]] = relationship("TaskModel", back_populates="owner")
+    roles: Mapped[List["RoleModel"]] = relationship("RoleModel", secondary="user_role", back_populates="users", lazy="raise_on_sql")
+    tasks: Mapped[List["TaskModel"]] = relationship("TaskModel", back_populates="owner", lazy="raise_on_sql")
 
     def __repr__(self):
         return f"<User(id={self.id}, username='{self.username}')>"
